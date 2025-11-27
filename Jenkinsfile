@@ -1,7 +1,21 @@
 pipeline {
   agent any
+  options {
+    skipDefaultCheckout(true)
+  }
 
   stages {
+
+    stage('Checkout') {
+      steps {
+        // FULL CLEAN CHECKOUT
+        deleteDir()
+        checkout([$class: 'GitSCM',
+          branches: [[name: '*/main']],
+          userRemoteConfigs: [[url: 'https://github.com/SujanShankar/mintpay-flask-service.git']]
+        ])
+      }
+    }
 
     stage('Pre-check Docker') {
       steps {
@@ -25,7 +39,6 @@ pipeline {
     stage('Verify') {
       steps {
         sh 'docker ps --filter name=mintpay-svc --format "{{.Names}} {{.Image}} {{.Ports}}"'
-        sh 'docker images --filter=reference="mintpay-svc:5"'
       }
     }
   }
