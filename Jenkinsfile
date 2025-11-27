@@ -1,18 +1,23 @@
 pipeline {
   agent any
+
   options {
-    skipDefaultCheckout(true)
+    skipDefaultCheckout(true)   // IMPORTANT: prevents Jenkins auto-checkout
   }
 
   stages {
 
     stage('Checkout') {
       steps {
-        // FULL CLEAN CHECKOUT
-        deleteDir()
-        checkout([$class: 'GitSCM',
-          branches: [[name: '*/main']],
-          userRemoteConfigs: [[url: 'https://github.com/SujanShankar/mintpay-flask-service.git']]
+        script {
+          deleteDir()  // FULL CLEAN before checkout
+        }
+        checkout([
+          $class: 'GitSCM',
+          branches: [[name: 'main']],   // CORRECT
+          userRemoteConfigs: [[
+            url: 'https://github.com/SujanShankar/mintpay-flask-service.git'
+          ]]
         ])
       }
     }
@@ -39,13 +44,14 @@ pipeline {
     stage('Verify') {
       steps {
         sh 'docker ps --filter name=mintpay-svc --format "{{.Names}} {{.Image}} {{.Ports}}"'
+        sh 'curl -s http://host.docker.internal:12240 || true'
       }
     }
   }
 
   post {
     failure {
-      echo 'Pipeline failed — please check the console log.'
+      echo 'Pipeline failed — please check logs.'
     }
   }
 }
