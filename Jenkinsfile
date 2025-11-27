@@ -1,14 +1,7 @@
 pipeline {
   agent any
-   options {
-    skipDefaultCheckout(false)
-  }
+
   stages {
-    stage('Checkout') {
-      steps {
-        git url: 'https://github.com/SujanShankar/mintpay-flask-service.git', branch: 'main'
-      }
-    }
 
     stage('Pre-check Docker') {
       steps {
